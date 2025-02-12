@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.5"?>
+<plugin>
+
+   <extension-point id="propertiesProviders"
+					name="%propertiesProviders.name"
+					schema="schema/propertiesProviders.exsd" />
+   <extension-point id="projectLabelProviders"
+                    name="%projectLabelProviders.name"
+                    schema="schema/projectLabelProviders.exsd"/>
+   <extension-point id="configSourceProviders"
+                    name="%configSourceProviders.name"
+                    schema="schema/configSourceProviders.exsd"/>
+   <extension-point id="staticPropertyProviders"
+                    name="%staticPropertyProviders.name"
+                    schema="schema/staticPropertyProviders.exsd"/>
+
+   <!-- Delegate command handler for application.properties file -->
+   <extension point="org.eclipse.jdt.ls.core.delegateCommandHandler">
+      <delegateCommandHandler class="org.eclipse.lsp4mp.jdt.internal.core.ls.MicroProfileDelegateCommandHandler">
+            <command id="microprofile/projectInfo"/>
+            <command id="microprofile/propertyDefinition"/>
+            <command id="microprofile/propertyDocumentation"/>
+       </delegateCommandHandler>
+   </extension>
+
+   <!-- Delegate command handler for Java file -->
+   <extension point="org.eclipse.jdt.ls.core.delegateCommandHandler">
+      <delegateCommandHandler class="org.eclipse.lsp4mp.jdt.internal.core.ls.MicroProfileDelegateCommandHandlerForJava">
+            <command id="microprofile/java/fileInfo"/>
+            <command id="microprofile/java/codeAction"/>
+            <command id="microprofile/java/codeActionResolve"/>
+            <command id="microprofile/java/codeLens"/>
+            <command id="microprofile/java/completion"/>
+            <command id="microprofile/java/definition"/>
+            <command id="microprofile/java/diagnostics"/>
+            <command id="microprofile/java/hover"/>
+            <command id="microprofile/java/workspaceSymbols"/>
+       </delegateCommandHandler>
+   </extension>
+
+   <!-- Delegate command handler for Java project types -->
+   <extension point="org.eclipse.jdt.ls.core.delegateCommandHandler">
+      <delegateCommandHandler class="org.eclipse.lsp4mp.jdt.internal.core.ls.JavaProjectDelegateCommandHandler">
+            <command id="microprofile/java/projectLabels"/>
+            <command id="microprofile/java/workspaceLabels"/>
+      </delegateCommandHandler>
+   </extension>
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.projectLabelProviders">
+      <provider class="org.eclipse.lsp4mp.jdt.internal.core.providers.MavenProjectLabelProvider" />
+      <provider class="org.eclipse.lsp4mp.jdt.internal.core.providers.GradleProjectLabelProvider" />
+      <provider class="org.eclipse.lsp4mp.jdt.internal.core.providers.MicroProfileProjectLabelProvider" />
+   </extension>
+
+   <!-- Configuration sources -->
+   <extension point="org.eclipse.lsp4mp.jdt.core.configSourceProviders">
+      <provider class="org.eclipse.lsp4mp.jdt.internal.core.providers.MicroProfileConfigSourceProvider" />
+   </extension>
+   
+      <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants" >
+      <!-- Diagnostics managed with Java AST vistor -->
+   	  <diagnostics class="org.eclipse.lsp4mp.jdt.internal.core.java.validators.JavaASTDiagnosticsParticipant" />
+   </extension>
+
+
+   <!-- Java Util Logging Config support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.propertiesProviders">
+      <!-- Hints provider for java.util.logging.Level -->
+      <provider class="org.eclipse.lsp4mp.jdt.internal.jul.properties.JBossLogManagerPropertyProvider" />
+   </extension>
+   
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <staticPropertyProvider resource="/static-properties/jul-metadata.json" />
+   </extension>
+
+   <!-- Microprofile Config support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.propertiesProviders">
+      <!-- Properties provider from the MicroProfile @ConfigProperty annotation -->
+      <provider class="org.eclipse.lsp4mp.jdt.internal.config.properties.MicroProfileConfigPropertyProvider" />
+      <!-- Properties provider from the MicroProfile @ConfigProperties annotation -->
+      <provider class="org.eclipse.lsp4mp.jdt.internal.config.properties.MicroProfileConfigPropertiesProvider" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants">
+      <!-- Java definition for the MicroProfile @ConfigProperty annotation -->
+      <definition class="org.eclipse.lsp4mp.jdt.internal.config.java.MicroProfileConfigDefinitionParticipant" />
+      <!-- Java hover for the MicroProfile @ConfigProperty annotation -->
+      <hover class="org.eclipse.lsp4mp.jdt.internal.config.java.MicroProfileConfigHoverParticipant" />
+      <!-- Java codeActions for MicroProfile @ConfigProperty -->
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
+                  class="org.eclipse.lsp4mp.jdt.internal.config.java.NoValueAssignedToPropertyQuickFix" />
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-config#NO_VALUE_ASSIGNED_TO_PROPERTY"
+                  class="org.eclipse.lsp4mp.jdt.internal.config.java.InsertDefaultValueAnnotationAttributeQuickFix" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaASTValidators">
+      <!-- Java validation for the MicroProfile @ConfigProperty annotation -->
+      <validator class="org.eclipse.lsp4mp.jdt.internal.config.java.MicroProfileConfigASTValidator" />
+   </extension>
+
+   <!-- Microprofile Config Static Property support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <staticPropertyProvider resource="/static-properties/mp-config-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.config.Config" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <!-- Microprofile Context Propagation support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile Context Propagation -->
+      <staticPropertyProvider resource="/static-properties/mp-context-propagation-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.context.ThreadContext" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <!-- Microprofile Fault Tolerance support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.propertiesProviders">
+      <!-- Properties provider from the MicroProfile Fault Tolerance annotations -->
+      <provider class="org.eclipse.lsp4mp.jdt.internal.faulttolerance.properties.MicroProfileFaultToleranceProvider" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants" >
+      <!-- Java definition for the MicroProfile Fault Tolerance annotations -->
+      <definition class="org.eclipse.lsp4mp.jdt.internal.faulttolerance.java.MicroProfileFaultToleranceDefinitionParticipant" />
+   	  <!-- Completion for Fault Tolerance annotations -->
+   	  <completion class="org.eclipse.lsp4mp.jdt.internal.faulttolerance.java.MicroProfileFaultToleranceCompletionParticipant" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaASTValidators">
+      <!-- Java validation for the MicroProfile @Fallback / @Asynchronous annotations -->
+      <validator class="org.eclipse.lsp4mp.jdt.internal.faulttolerance.java.MicroProfileFaultToleranceASTValidator" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaASTValidators">
+      <!-- Java validation for the MicroProfile Fault Tolerance annotations -->
+      <annotationValidator annotation="org.eclipse.microprofile.faulttolerance.CircuitBreaker"
+                           source="microprofile-faulttolerance" >
+         <attribute name="delay" range="0" /> <!-- x >=0 -->
+         <attribute name="requestVolumeThreshold" range="1" /> <!-- x >=1 -->
+         <attribute name="failureRatio" range="[0,1]" /> <!-- 0 <= x <= 1 -->
+         <attribute name="successThreshold" range="1" /> <!-- x >=1 -->
+      </annotationValidator>
+
+      <annotationValidator annotation="org.eclipse.microprofile.faulttolerance.Bulkhead"
+                   	       source="microprofile-faulttolerance" >
+         <attribute name="value" range="0" /> <!-- x >=0 -->
+         <attribute name="waitingTaskQueue" range="0" /> <!-- x >=0 -->
+      </annotationValidator>
+
+      <annotationValidator annotation="org.eclipse.microprofile.faulttolerance.Timeout"
+                           source="microprofile-faulttolerance" >
+         <attribute name="value" range="0" /> <!-- x >=0 -->
+      </annotationValidator>
+
+      <annotationValidator annotation="org.eclipse.microprofile.faulttolerance.Retry"
+                           source="microprofile-faulttolerance" >
+         <attribute name="delay" range="0" /> <!-- x >=0 -->
+         <attribute name="maxDuration" range="0" /> <!-- x >=0 -->
+         <attribute name="jitter" range="0" /> <!-- x >=0 -->
+         <attribute name="maxRetries" range="-1" /> <!-- x >=0 -->
+      </annotationValidator>
+   </extension>
+
+   <!-- Microprofile LRA support -->
+   
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile Health -->
+      <staticPropertyProvider resource="/static-properties/mp-lra-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.lra.annotation.ws.rs.LRA" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <!-- Microprofile Metrics support -->
+   
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile Metrics -->
+      <staticPropertyProvider resource="/static-properties/mp-metrics-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.metrics.MetricID" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants" >
+      <!-- Java diagnostics for MicroProfile Metrics -->
+      <diagnostics class="org.eclipse.lsp4mp.jdt.internal.metrics.java.MicroProfileMetricsDiagnosticsParticipant" />
+      <!-- Java codeActions for MicroProfile Metrics -->
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-metrics#ApplicationScopedAnnotationMissing"
+                  class="org.eclipse.lsp4mp.jdt.internal.metrics.java.ApplicationScopedAnnotationMissingQuickFix" />
+   </extension>
+
+   <!-- Microprofile OpenTracing support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile OpenTracing -->
+      <staticPropertyProvider resource="/static-properties/mp-opentracing-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.opentracing.Traced" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <!-- Microprofile OpenAPI support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for the MicroProfile OpenAPI -->
+      <staticPropertyProvider resource="/static-properties/mp-openapi-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.openapi.OASConfig" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants">
+      <!-- Java codeAction for generating MicroProfile OpenAPI annotations -->
+      <codeAction kind="source"
+                  class="org.eclipse.lsp4mp.jdt.internal.openapi.java.MicroProfileGenerateOpenAPIOperation" />
+   </extension>
+
+   <!-- Microprofile Health support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile Health -->
+      <staticPropertyProvider resource="/static-properties/mp-health-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.health.Liveness" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants">
+      <!-- Java diagnostics for the MicroProfile Health -->
+      <diagnostics class="org.eclipse.lsp4mp.jdt.internal.health.java.MicroProfileHealthDiagnosticsParticipant" />
+      <!-- Java codeActions for the MicroProfile Health -->
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-health#ImplementHealthCheck"
+                  class="org.eclipse.lsp4mp.jdt.internal.health.java.ImplementHealthCheckQuickFix" />
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-health#HealthAnnotationMissing"
+                  class="org.eclipse.lsp4mp.jdt.internal.health.java.HealthAnnotationMissingQuickFix" />
+   </extension>
+
+   <!-- Microprofile Reactive Messaging support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.propertiesProviders">
+      <!-- Properties provider from the MicroProfileReactive Messaging @Connector, @ConnectorAttribute, @Incoming, @Outgoing annotations -->
+      <provider class="org.eclipse.lsp4mp.jdt.internal.reactivemessaging.properties.MicroProfileReactiveMessagingProvider" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaASTValidators">
+      <!-- Java diagnostics for MicroProfileReactive Messaging -->
+      <validator class="org.eclipse.lsp4mp.jdt.internal.reactivemessaging.java.MicroProfileReactiveMessagingASTValidator" />
+   </extension>
+
+   <!-- Microprofile RestClient support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.propertiesProviders">
+      <!-- Properties provider from the MicroProfile @RegisterRestClient annotation -->
+      <provider class="org.eclipse.lsp4mp.jdt.internal.restclient.properties.MicroProfileRegisterRestClientProvider" />
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants">
+      <!-- Java URL codeLens for RestClient -->
+      <codeLens class="org.eclipse.lsp4mp.jdt.internal.restclient.java.MicroProfileRestClientCodeLensParticipant" />
+      <!-- Java diagnostics for the MicroProfile RestClient -->
+      <diagnostics class="org.eclipse.lsp4mp.jdt.internal.restclient.java.MicroProfileRestClientDiagnosticsParticipant" />
+      <!-- Java codeActions for the MicroProfile RestClient -->
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-restclient#InjectAnnotationMissing"
+                  class="org.eclipse.lsp4mp.jdt.internal.restclient.java.InjectAnnotationMissingQuickFix" />
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-restclient#RestClientAnnotationMissing"
+                  class="org.eclipse.lsp4mp.jdt.internal.restclient.java.RestClientAnnotationMissingQuickFix" />
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-restclient#InjectAndRestClientAnnotationMissing"
+                  class="org.eclipse.lsp4mp.jdt.internal.restclient.java.InjectAndRestClientAnnotationMissingQuickFix" />
+      <codeAction kind="quickfix"
+                  targetDiagnostic="microprofile-restclient#RegisterRestClientAnnotationMissing"
+                  class="org.eclipse.lsp4mp.jdt.internal.restclient.java.RegisterRestClientAnnotationMissingQuickFix" />
+   </extension>
+
+   <!-- MicroProfile JWT Support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile JWT -->
+      <staticPropertyProvider resource="/static-properties/mp-jwt-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.jwt.Claim" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+    <!-- MicroProfile GraphQL Support -->
+
+   <extension point="org.eclipse.lsp4mp.jdt.core.staticPropertyProviders">
+      <!-- Properties provider for MicroProfile GraphQL -->
+      <staticPropertyProvider resource="/static-properties/mp-graphql-metadata.json" >
+         <enabledWhen>
+            <typeOnClasspath type="org.eclipse.microprofile.graphql.Name" />
+         </enabledWhen>
+      </staticPropertyProvider>
+   </extension>
+
+   <extension point="org.eclipse.lsp4jdt.core.javaASTValidators">
+      <!-- Java validation for microprofile-graphql features -->
+      <validator class="org.eclipse.lsp4mp.jdt.internal.graphql.java.MicroProfileGraphQLASTValidator" />
+   </extension>
+
+   <!-- JAX-RS support -->
+
+   <extension point="org.eclipse.lsp4jdt.core.javaFeatureParticipants">
+      <!-- Java URL codeLens for JAX-RS -->
+      <codeLens class="org.eclipse.lsp4mp.jdt.internal.jaxrs.java.JaxRsCodeLensParticipant" />
+      <workspaceSymbols
+            class="org.eclipse.lsp4mp.jdt.internal.jaxrs.java.JaxRsWorkspaceSymbolParticipant" />
+   </extension>
+</plugin>
