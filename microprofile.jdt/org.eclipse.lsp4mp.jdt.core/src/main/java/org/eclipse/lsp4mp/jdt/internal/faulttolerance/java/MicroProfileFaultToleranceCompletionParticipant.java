@@ -99,7 +99,9 @@ public class MicroProfileFaultToleranceCompletionParticipant implements IJavaCom
 	 */
 	private static IAnnotation getFallbackAnnotation(ITypeRoot typeRoot, int offset) throws JavaModelException {
 		IJavaElement element = typeRoot.getElementAt(offset);
-		if (element.getElementType() != IJavaElement.METHOD) {
+		if (element == null) {
+			return null;
+		} else if (element.getElementType() != IJavaElement.METHOD) {
 			return null;
 		}
 		IAnnotatable annotatable = (IAnnotatable) element;
